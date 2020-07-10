@@ -1,0 +1,85 @@
+const {gql} = require('apollo-server');
+
+const typeDefs = gql `
+    type User{
+        id:ID
+        name:String
+        lastName:String
+        email:String
+        createdAt:String
+    }
+
+    type Product{
+        id:ID
+        name:String
+        exist: Int
+        price: Float
+    }
+
+    type Client{
+        id:ID
+        name:String
+        lastName:String
+        company:String
+        email:String
+        phone:String
+        seller:ID
+    }
+
+    type Token{
+        token:String
+    }
+
+    input ClientInput{
+        name:String!
+        lastName:String!
+        company:String!
+        email:String!
+        phone:String
+    }
+
+    input UserInput{
+        name: String!
+        lastName: String!
+        email: String!
+        password: String!
+    }
+
+    input AuthInput{
+        email:String!
+        password:String!
+    }
+
+    input ProductInput {
+        name:String!
+        exist: Int!
+        price:Float!
+    }
+
+    type Query{
+        #user
+        getUser(token: String!):User
+        #productos
+        getProducts:[Product]
+        getProduct(id:ID!):Product
+        # clientes
+        getAllClients:[Client]
+        getClientsSeller:[Client]
+        getClient(id:ID!):Client
+    }
+
+    type Mutation{
+        # usuario
+        newUser(input: UserInput): User
+        authUser(input: AuthInput):Token
+        # productos
+        newProduct(input:ProductInput):Product
+        updateProduct(id:ID!, input: ProductInput):Product
+        deleteProduct(id:ID!):String
+        #clientes
+        newClient(input: ClientInput):Client
+        
+    }
+`;
+
+module.exports = typeDefs;
