@@ -16,6 +16,21 @@ const typeDefs = gql `
         price: Float
     }
 
+    type Order{
+        id:ID
+        order:[OrderGroup]
+        total:Float
+        client:ID
+        seller:ID
+        createdAt:String
+        status: statusOrder
+    }
+
+    type OrderGroup{
+        id:ID
+        cant:Int
+    }
+
     type Client{
         id:ID
         name:String
@@ -56,6 +71,24 @@ const typeDefs = gql `
         price:Float!
     }
 
+    input orderProductInput{
+        id:ID,
+        cant: Int
+    }
+
+    input OrderInput{
+        order:[orderProductInput]
+        total:Float!
+        client:ID!
+        status: statusOrder
+    }
+
+    enum statusOrder{
+        PENDING
+        COMPLETED
+        CANCELLED
+    }
+
     type Query{
         #user
         getUser(token: String!):User
@@ -78,7 +111,10 @@ const typeDefs = gql `
         deleteProduct(id:ID!):String
         #clientes
         newClient(input: ClientInput):Client
-        
+        editClient(id:ID,input: ClientInput):Client
+        deleteClient(id: ID):String
+        #pedidos
+        newOrder(input: OrderInput):String
     }
 `;
 

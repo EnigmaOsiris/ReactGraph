@@ -68,16 +68,20 @@ const resolvers ={
     },
     Mutation:{
         newUser:async (_,{input})=>{
+            console.log(input);
+            
             const {email, password} = input;
             // revisar si existe un usuario
             const existUser =  await User.findOne({email});
             console.log(existUser);
             if (existUser) {
+                console.log("falla");
+                
                throw new Error('El usuario ya esta registrado'); 
             }
             // hashear password
             const salt =await bcryptjs.getSalt(10);
-            input.password= await bcryptjs.hash(password,salt);
+            input.password= await bcryptjs.hash(password,10);
 
             try {
                 // guardar
@@ -103,7 +107,7 @@ const resolvers ={
              }
             // crear el token
             return {
-                token: crearToken(existUser, process.env.WORD_SECRET,'1h')
+                token: crearToken(existUser, process.env.WORD_SECRET,'24h')
             }
 
         },
@@ -157,6 +161,58 @@ const resolvers ={
                 
                 throw new Error(error)
             }
+        },
+        editClient: async(_,{id, input}, ctx)=>{
+            // verificar si existe
+            let cliente = await Client.findById(id);
+            if (!cliente) {
+                throw new Error('Ese cliente no existe')
+            }
+            // verificar si es el vendedor q 
+            if (cliente.seller.toString()!==ctx.user.id) {
+                throw new Error('No tienes los permisos')
+            }
+            cliente = await Client.findOneAndUpdate({_id: id}, input, {new:true});
+            return cliente;
+        },
+        deleteClient: async(_,{id}, ctx)=>{
+            // verificar si existe
+            let cliente = await Client.findById(id);
+            if (!cliente) {
+                throw new Error('Ese cliente no existe')
+            }
+            // verificar si es el vendedor q 
+            if (cliente.seller.toString()!==ctx.user.id) {
+                throw new Error('No tienes los permisos')
+            }
+            // eliminar cliente
+            await Client.findOneAndDelete({_id: id});
+            return "Cliente eliminado"
+        },
+        newOrder: async(_,{input},ctx)=>{
+            const {client}= input;
+            // verificar si el cliente existe
+            let existClient = await Client.findById(client);
+            if(!existClient){
+                throw new Error('El cliente no existe')
+            }
+            // el cliente es del vendedor
+            // verificar si es el vendedor q 
+            if (existClient.seller.toString()!==ctx.user.id) {
+                throw new Error('No tienes los permisos')
+            }
+            // stock disponible
+            console.log(input.order);
+            for await (const articulo of input.order){
+                console.log(articulo);
+                const producto = await Product.findById(id);
+                if (articulo.cant>producto) {
+                    throw new Error(`el articulo ${producto.name} excede la cantidad disponible`)
+                }
+                
+            }
+            // asignar vendedor
+            // guardar en base de datos
         }
         
     }
