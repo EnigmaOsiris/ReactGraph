@@ -99,6 +99,10 @@ const typeDefs = gql `
         getAllClients:[Client]
         getClientsSeller:[Client]
         getClient(id:ID!):Client
+        # orders
+        getAllOrder:[Order]
+        getOrderbySeller:[Order]
+        getOrderbyId(id: ID!):Order
     }
 
     type Mutation{
@@ -115,6 +119,7 @@ const typeDefs = gql `
         deleteClient(id: ID):String
         #pedidos
         newOrder(input: OrderInput):String
+        updateOrder(id:ID!, input:OrderInput):Order
     }
 `;
 

@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Product = require('../models/Product');
 const Client = require('../models/Client');
+const Order = require('../models/Pedido');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require( 'dotenv').config()
@@ -64,6 +65,40 @@ const resolvers ={
                 throw new Error("error de credenciales")
             }
             return client;
+        },
+        getAllClients: async ()=>{
+            try {
+                const orders= await Order.find({});
+                return orders;
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        getOrderbySeller: async(_,{},ctx)=>{
+            try {
+                const orders= await Order.find({selle: ctx.user.id});
+                return orders;
+            } catch (error) {
+                console.log(error);
+                throw new Error(error)
+            }
+        },
+        getOrderbyId: async(_, {id}, ctx)=>{
+            try {
+                // pedido existe
+                const order= await Order.findById(id);
+                if (!order) {
+                    throw new Error("Pedido no encontrado");
+                }
+                // solo quien lo creo puede verlo
+                if (order.seller.toString()!==ctx.user.id) {
+                    throw new Error("no tienes los permisos")
+                }
+                return order;
+            } catch (error) {
+                console.log(error);
+                throw new Error(error)
+            }
         }
     },
     Mutation:{
@@ -209,10 +244,32 @@ const resolvers ={
                 if (articulo.cant>producto) {
                     throw new Error(`el articulo ${producto.name} excede la cantidad disponible`)
                 }
+                else{
+                    // restar
+                    producto.exist= producto.exist-articulo.cant;
+                    await producto.save();
+                }
                 
             }
+            // crear un nuevo pedido
+            const nuevoPedido = new Order(input);
             // asignar vendedor
+            nuevoPedido.seller=ctx.user.id;
             // guardar en base de datos
+            const result= await nuevoPedido.save()
+            return result;
+        },
+        updateOrder: async(_,{id, input},ctx)=>{
+            try {
+                // pedido existe
+                // si el cliente existe
+                // si el cliente pertence al vendedor
+                // revisar stock
+                // save
+            } catch (error) {
+                console.log(error);
+                throw new Error(error);
+            }
         }
         
     }
