@@ -261,8 +261,17 @@ const resolvers ={
         },
         updateOrder: async(_,{id, input},ctx)=>{
             try {
+                const {client} = input;
                 // pedido existe
+                const existOrder= await Order.findById(id);
+                if (!existOrder) {
+                    throw new Error("El pedido no existe")
+                }
                 // si el cliente existe
+                const existOrder= await Order.findById(id);
+                if (!existOrder) {
+                    throw new Error("El pedido no existe")
+                }
                 // si el cliente pertence al vendedor
                 // revisar stock
                 // save
